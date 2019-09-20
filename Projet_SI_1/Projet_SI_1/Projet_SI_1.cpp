@@ -103,55 +103,63 @@ int main()
 			Vec3<float> rPos = { i,j,0.0 };
 			Ray ray = Ray(rPos, rDir);
 
+			int intersectedSphere = -1;
+			float distIntersectedSphere = -1;
 			for (int k = 0; k < nbSpheres; k++)
 			{
 				std::optional<float> res = intersect(ray, spheres[k]);
 				if (res.has_value())
 				{
-					bool gotIntersected = false;
-
-					Vec3<float> ptInter = ray.pos + ray.dir * res.value();
-					Vec3<float> normale = { ptInter.x - spheres[k].center.x, ptInter.y - spheres[k].center.y, ptInter.z - spheres[k].center.z };
-					normalize(normale);
-					Vec3<float> dirLight = lightPos1 - ptInter;
-					ptInter = ptInter +  dirLight * (float)0.0001;
-					float lightDistance = norm(dirLight);
-					normalize(dirLight);
-					
-					Ray rayToLight(ptInter, dirLight);
-					for (int l = 0; l < nbSpheres; l++)
+					if (distIntersectedSphere == -1 || distIntersectedSphere > res.value())
 					{
-						std::optional<float> resLight = intersect(rayToLight, spheres[l]);
-						if (resLight.has_value())
-						{
-							gotIntersected = true;
-						}
-					}
-					if (!gotIntersected)
-					{
-						float scal = dot(dirLight, normale) / (norm(dirLight) * norm(normale) );
-
-
-						color.rgbRed =     scal * lightColor1.rgbRed ;
-						color.rgbGreen =   scal *  lightColor1.rgbGreen ;
-						color.rgbBlue =  scal*lightColor1.rgbBlue ;
-					}
-					else
-					{
-						color.rgbRed += 0;
-						color.rgbGreen += 0;
-						color.rgbBlue += 0;
-						color.rgbReserved = 255;
+						distIntersectedSphere = res.value();
+						intersectedSphere = k;
 					}
 				}
 			}
+			if (distIntersectedSphere != -1)
+			{
+				bool gotIntersected = false;
 
+				Vec3<float> ptInter = ray.pos + ray.dir * distIntersectedSphere;
+				Vec3<float> normale = { ptInter.x - spheres[intersectedSphere].center.x, ptInter.y - spheres[intersectedSphere].center.y, ptInter.z - spheres[intersectedSphere].center.z };
+				normalize(normale);
+				Vec3<float> dirLight = lightPos1 - ptInter;
+				ptInter = ptInter + dirLight * (float)0.0001;
+				float lightDistance = norm(dirLight);
+				normalize(dirLight);
+
+				Ray rayToLight(ptInter, dirLight);
+				for (int l = 0; l < nbSpheres; l++)
+				{
+					std::optional<float> resLight = intersect(rayToLight, spheres[l]);
+					if (resLight.has_value())
+					{
+						gotIntersected = true;
+					}
+				}
+				if (!gotIntersected)
+				{
+					float scal = dot(dirLight, normale) / (norm(dirLight) * norm(normale));
+
+
+					color.rgbRed = scal * lightColor1.rgbRed;
+					color.rgbGreen = scal * lightColor1.rgbGreen;
+					color.rgbBlue = scal * lightColor1.rgbBlue;
+				}
+				else
+				{
+					color.rgbRed += 0;
+					color.rgbGreen += 0;
+					color.rgbBlue += 0;
+					color.rgbReserved = 255;
+				}
+			}
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
-		}
+		}		
 	}
+
 	FreeImage_Save(FIF_PNG, bitmap, "c_bo.png");
-
-
 
 	FreeImage_DeInitialise();
 }
