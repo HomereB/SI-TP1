@@ -10,7 +10,9 @@
 #include <optional>
 #include <vector>
 #include <ctime>
-
+#include "Light.h"
+#include <algorithm>
+#pragma exp parallel for
 
 const int width = 512;
 const int height = 512;
@@ -58,13 +60,39 @@ int main()
 
 	std::srand(std::time(nullptr));
 
-	Vec3<float> lightPos1 = {256,512,256};
+	
+
+	std::vector<Light> lights;
+	int nbLights = 1000;
 	RGBQUAD lightColor1;
-	lightColor1.rgbRed = 200;
-	lightColor1.rgbGreen = 200;
-	lightColor1.rgbBlue = 200;
+	lightColor1.rgbRed = 0;
+	lightColor1.rgbGreen = 255;
+	lightColor1.rgbBlue = 255;
 	lightColor1.rgbReserved = 255;
-	int lightIntensity = 400000;
+
+	RGBQUAD lightColor2;
+	lightColor2.rgbRed = 255;
+	lightColor2.rgbGreen = 0;
+	lightColor2.rgbBlue = 0;
+	lightColor2.rgbReserved = 255;
+
+	int intensity = 200;
+	for (int i = 0; i < nbLights; i++)
+	{
+		float x = 251 + std::rand() % 10;
+		float y = 507 + std::rand() % 10;
+		float z = 251 + std::rand() % 10;
+		Vec3<float> lightPos = {x,y,z};
+		lights.push_back(Light(lightPos,lightColor1,intensity));
+	}
+	for (int i = 0; i < nbLights; i++)
+	{
+		float x = 507 + std::rand() % 10;
+		float y = 251 + std::rand() % 10;
+		float z = 251 + std::rand() % 10;
+		Vec3<float> lightPos = { x,y,z };
+		lights.push_back(Light(lightPos, lightColor2, intensity));
+	}
 
 	int nbSpheres = 4;
 	std::vector<Sphere> spheres;
@@ -97,6 +125,9 @@ int main()
 			color.rgbRed = 0;
 			color.rgbGreen = 0;
 			color.rgbBlue = 0;
+			float colorR = 0;
+			float colorG = 0;
+			float colorB = 0;
 
 			Vec3<float> rDir = { 0.0,0.0,1.0 };
 			normalize(rDir);
@@ -119,42 +150,48 @@ int main()
 			}
 			if (distIntersectedSphere != -1)
 			{
-				bool gotIntersected = false;
-
-				Vec3<float> ptInter = ray.pos + ray.dir * distIntersectedSphere;
-				Vec3<float> normale = { ptInter.x - spheres[intersectedSphere].center.x, ptInter.y - spheres[intersectedSphere].center.y, ptInter.z - spheres[intersectedSphere].center.z };
-				normalize(normale);
-				Vec3<float> dirLight = lightPos1 - ptInter;
-				ptInter = ptInter + dirLight * (float)0.0001;
-				float lightDistance = norm(dirLight);
-				normalize(dirLight);
-
-				Ray rayToLight(ptInter, dirLight);
-				for (int l = 0; l < nbSpheres; l++)
+				for (int i = 0; i < lights.size(); i++)
 				{
-					std::optional<float> resLight = intersect(rayToLight, spheres[l]);
-					if (resLight.has_value())
+					bool gotIntersected = false;
+
+					Vec3<float> ptInter = ray.pos + ray.dir * distIntersectedSphere;
+					Vec3<float> normale = { ptInter.x - spheres[intersectedSphere].center.x, ptInter.y - spheres[intersectedSphere].center.y, ptInter.z - spheres[intersectedSphere].center.z };
+					normalize(normale);
+					Vec3<float> dirLight = lights[i].pos - ptInter;
+					ptInter = ptInter + dirLight * (float)0.0001;
+					float lightDistance = norm(dirLight);
+					normalize(dirLight);
+
+					Ray rayToLight(ptInter, dirLight);
+					for (int l = 0; l < nbSpheres; l++)
 					{
-						gotIntersected = true;
+						std::optional<float> resLight = intersect(rayToLight, spheres[l]);
+						if (resLight.has_value())
+						{
+							gotIntersected = true;
+						}
+					}
+					if (!gotIntersected)
+					{
+						float scal = dot(dirLight, normale) / (norm(dirLight) * norm(normale));
+
+
+						colorR += lights[i].intensity * scal * lights[i].color.rgbRed / (nbLights* lightDistance);
+						colorG += lights[i].intensity * scal * lights[i].color.rgbGreen / (nbLights * lightDistance);
+						colorB += lights[i].intensity * scal * lights[i].color.rgbBlue / (nbLights * lightDistance);
+					}
+					else
+					{
+						colorR += 0;
+						colorG += 0;
+						colorB += 0;
 					}
 				}
-				if (!gotIntersected)
-				{
-					float scal = dot(dirLight, normale) / (norm(dirLight) * norm(normale));
-
-
-					color.rgbRed = scal * lightColor1.rgbRed;
-					color.rgbGreen = scal * lightColor1.rgbGreen;
-					color.rgbBlue = scal * lightColor1.rgbBlue;
-				}
-				else
-				{
-					color.rgbRed += 0;
-					color.rgbGreen += 0;
-					color.rgbBlue += 0;
-					color.rgbReserved = 255;
-				}
 			}
+			color.rgbRed = std::clamp((int)colorR, 0, 255);
+			color.rgbGreen = std::clamp((int)colorG, 0, 255);
+			color.rgbBlue = std::clamp((int)colorB, 0, 255);
+
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
 		}		
 	}
