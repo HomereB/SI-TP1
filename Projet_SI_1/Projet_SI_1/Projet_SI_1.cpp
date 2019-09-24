@@ -12,6 +12,7 @@
 #include <ctime>
 #include "Light.h"
 #include <algorithm>
+#include <math.h>
 #pragma exp parallel for
 
 const int width = 512;
@@ -60,10 +61,10 @@ int main()
 
 	std::srand(std::time(nullptr));
 
-	
+	Vec3<float> albedo = { 0,1,1 };
 
 	std::vector<Light> lights;
-	int nbLights = 1000;
+	int nbLights = 100;
 	RGBQUAD lightColor1;
 	lightColor1.rgbRed = 0;
 	lightColor1.rgbGreen = 255;
@@ -76,19 +77,21 @@ int main()
 	lightColor2.rgbBlue = 0;
 	lightColor2.rgbReserved = 255;
 
-	int intensity = 200;
+
+	int intensity = 22500;
+
 	for (int i = 0; i < nbLights; i++)
 	{
 		float x = 251 + std::rand() % 10;
 		float y = 507 + std::rand() % 10;
 		float z = 251 + std::rand() % 10;
-		Vec3<float> lightPos = {x,y,z};
-		lights.push_back(Light(lightPos,lightColor1,intensity));
+		Vec3<float> lightPos = { x,y,z };
+		lights.push_back(Light(lightPos, lightColor1, intensity));
 	}
 	for (int i = 0; i < nbLights; i++)
 	{
 		float x = 507 + std::rand() % 10;
-		float y = 251 + std::rand() % 10;
+		float y = 507 + std::rand() % 10;
 		float z = 251 + std::rand() % 10;
 		Vec3<float> lightPos = { x,y,z };
 		lights.push_back(Light(lightPos, lightColor2, intensity));
@@ -98,16 +101,16 @@ int main()
 	std::vector<Sphere> spheres;
 	for (int i = 0; i < nbSpheres; i++)
 	{
-		int r = 16+std::rand()%48;
-		float x = 64+std::rand() % 384;
-		float y = 64+std::rand() % 384;
-		float z = 64+std::rand() % 384;
+		int r = 16 + std::rand() % 48;
+		float x = 64 + std::rand() % 384;
+		float y = 64 + std::rand() % 384;
+		float z = 64 + std::rand() % 384;
 		Vec3<float> c = { x, y, z };
-		Sphere s(c, r);
+		Sphere s(c, r,albedo);
 		spheres.push_back(s);
-		std::cout << c  <<r<< std::endl;
+		std::cout << c << r << std::endl;
 	}
-	
+
 
 
 	FreeImage_Initialise();
@@ -173,12 +176,12 @@ int main()
 					}
 					if (!gotIntersected)
 					{
-						float scal = dot(dirLight, normale) / (norm(dirLight) * norm(normale));
+						float scal = std::abs(dot(dirLight, normale) / (norm(dirLight) * norm(normale)));
 
 
-						colorR += lights[i].intensity * scal * lights[i].color.rgbRed / (nbLights* lightDistance);
-						colorG += lights[i].intensity * scal * lights[i].color.rgbGreen / (nbLights * lightDistance);
-						colorB += lights[i].intensity * scal * lights[i].color.rgbBlue / (nbLights * lightDistance);
+						colorR += spheres[intersectedSphere].albedo.x * lights[i].intensity * scal * lights[i].color.rgbRed / (nbLights * lightDistance * lightDistance);
+						colorG += spheres[intersectedSphere].albedo.y *lights[i].intensity * scal * lights[i].color.rgbGreen / (nbLights * lightDistance * lightDistance);
+						colorB += spheres[intersectedSphere].albedo.z * lights[i].intensity * scal * lights[i].color.rgbBlue / (nbLights * lightDistance * lightDistance);
 					}
 					else
 					{
@@ -193,12 +196,13 @@ int main()
 			color.rgbBlue = std::clamp((int)colorB, 0, 255);
 
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
-		}		
+		}
 	}
 
 	FreeImage_Save(FIF_PNG, bitmap, "c_bo.png");
 
 	FreeImage_DeInitialise();
 }
+
 
 
