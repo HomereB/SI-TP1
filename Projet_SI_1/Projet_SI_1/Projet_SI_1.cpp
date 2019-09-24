@@ -56,29 +56,61 @@ std::optional<float> intersect(Ray ray,Sphere s)
 	}
 }
 
+//Vec3<float> DrawRay(int iterator,Vec3<float> color,Vec3<float> normale,)
+//{
+//
+//	bool gotIntersected = false;
+//
+//	Vec3<float> ptInter = ray.pos + ray.dir * distIntersectedSphere;
+//	Vec3<float> normale = { ptInter.x - spheres[intersectedSphere].center.x, ptInter.y - spheres[intersectedSphere].center.y, ptInter.z - spheres[intersectedSphere].center.z };
+//	normalize(normale);
+//	Vec3<float> dirLight = lights[i].pos - ptInter;
+//	ptInter = ptInter + dirLight * (float)0.0001;
+//	float lightDistance = norm(dirLight);
+//	normalize(dirLight);
+//
+//	Ray rayToLight(ptInter, dirLight);
+//	for (int l = 0; l < nbSpheres; l++)
+//	{
+//		std::optional<float> resObj = intersect(rayToLight, spheres[l]);
+//		if (resLight.has_value())
+//		{
+//			gotIntersected = true;
+//		}
+//	}
+//	if (!gotIntersected)
+//	{
+//		float scal = std::abs(dot(dirLight, normale) / (norm(dirLight) * norm(normale)));
+//
+//		color.x += spheres[intersectedSphere].albedo.x * scal * lights[i].color.x  / (resLight.has_value() * distanceObjet);
+//		color.y += spheres[intersectedSphere].albedo.y * scal * lights[i].color.y  / (distanceObjet * distanceObjet);
+//		color.z += spheres[intersectedSphere].albedo.z * scal * lights[i].color.z  / (distanceObjet * distanceObjet);
+//	}
+//	if(iterator>0)
+//	{
+//		color += DrawRay(iterator,color,);
+//	}
+//	else
+//	{
+//		color.x += 0;
+//		color.y += 0;
+//		color.z += 0;
+//	}
+//}
+
 int main()
 {
 
 	std::srand(std::time(nullptr));
 
-	Vec3<float> albedo = { 0,1,1 };
+	Vec3<float> albedo = { 1,1,1 };
 
 	std::vector<Light> lights;
 	int nbLights = 100;
-	RGBQUAD lightColor1;
-	lightColor1.rgbRed = 0;
-	lightColor1.rgbGreen = 255;
-	lightColor1.rgbBlue = 255;
-	lightColor1.rgbReserved = 255;
-
-	RGBQUAD lightColor2;
-	lightColor2.rgbRed = 255;
-	lightColor2.rgbGreen = 0;
-	lightColor2.rgbBlue = 0;
-	lightColor2.rgbReserved = 255;
+	Vec3<float> lightColor = { 1,1,1 };
 
 
-	int intensity = 22500;
+	int intensity = 5000000;
 
 	for (int i = 0; i < nbLights; i++)
 	{
@@ -86,7 +118,7 @@ int main()
 		float y = 507 + std::rand() % 10;
 		float z = 251 + std::rand() % 10;
 		Vec3<float> lightPos = { x,y,z };
-		lights.push_back(Light(lightPos, lightColor1, intensity));
+		lights.push_back(Light(lightPos, lightColor, intensity));
 	}
 	for (int i = 0; i < nbLights; i++)
 	{
@@ -94,7 +126,7 @@ int main()
 		float y = 507 + std::rand() % 10;
 		float z = 251 + std::rand() % 10;
 		Vec3<float> lightPos = { x,y,z };
-		lights.push_back(Light(lightPos, lightColor2, intensity));
+		lights.push_back(Light(lightPos, lightColor, intensity));
 	}
 
 	int nbSpheres = 4;
@@ -103,10 +135,11 @@ int main()
 	{
 		int r = 16 + std::rand() % 48;
 		float x = 64 + std::rand() % 384;
-		float y = 64 + std::rand() % 384;
+		float y = 256 + std::rand() % 256;
 		float z = 64 + std::rand() % 384;
 		Vec3<float> c = { x, y, z };
-		Sphere s(c, r,albedo);
+		Vec3<float> a = albedo - Vec3<float>{(std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f};
+		Sphere s(c, r,a);
 		spheres.push_back(s);
 		std::cout << c << r << std::endl;
 	}
@@ -178,10 +211,9 @@ int main()
 					{
 						float scal = std::abs(dot(dirLight, normale) / (norm(dirLight) * norm(normale)));
 
-
-						colorR += spheres[intersectedSphere].albedo.x * lights[i].intensity * scal * lights[i].color.rgbRed / (nbLights * lightDistance * lightDistance);
-						colorG += spheres[intersectedSphere].albedo.y *lights[i].intensity * scal * lights[i].color.rgbGreen / (nbLights * lightDistance * lightDistance);
-						colorB += spheres[intersectedSphere].albedo.z * lights[i].intensity * scal * lights[i].color.rgbBlue / (nbLights * lightDistance * lightDistance);
+						colorR += spheres[intersectedSphere].albedo.x * lights[i].intensity * scal * lights[i].color.x / (nbLights * lightDistance * lightDistance);
+						colorG += spheres[intersectedSphere].albedo.y * lights[i].intensity * scal * lights[i].color.y / (nbLights * lightDistance * lightDistance);
+						colorB += spheres[intersectedSphere].albedo.z * lights[i].intensity * scal * lights[i].color.z / (nbLights * lightDistance * lightDistance);
 					}
 					else
 					{

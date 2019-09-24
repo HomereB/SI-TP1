@@ -7,10 +7,10 @@ class Light
 {
 public:
 	Vec3<float> pos;
-	RGBQUAD color;
+	Vec3<float> color;
 	int intensity;
 
-	Light(Vec3<float> position, RGBQUAD col,int i)
+	Light(Vec3<float> position, Vec3<float> col,int i)
 	{
 		pos = position;
 		color = col;
