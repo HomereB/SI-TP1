@@ -110,32 +110,83 @@ int main()
 	Vec3<float> lightColor = { 1,1,1 };
 
 
-	int intensity = 5000000;
+	int intensity = 20000000;
 
-	for (int i = 0; i < nbLights; i++)
-	{
-		float x = 251 + std::rand() % 10;
-		float y = 507 + std::rand() % 10;
-		float z = 251 + std::rand() % 10;
-		Vec3<float> lightPos = { x,y,z };
-		lights.push_back(Light(lightPos, lightColor, intensity));
-	}
-	for (int i = 0; i < nbLights; i++)
-	{
-		float x = 507 + std::rand() % 10;
-		float y = 507 + std::rand() % 10;
-		float z = 251 + std::rand() % 10;
-		Vec3<float> lightPos = { x,y,z };
-		lights.push_back(Light(lightPos, lightColor, intensity));
-	}
 
-	int nbSpheres = 4;
+	//box
+	int nbSpheres = 5;
 	std::vector<Sphere> spheres;
-	for (int i = 0; i < nbSpheres; i++)
+	int rBoxRear = 100000;
+	int xBoxRear = 256;
+	int yBoxRear = 256;
+	int zBoxRear = 101000;
+	Vec3<float> centerBoxRear = { xBoxRear, yBoxRear, zBoxRear };
+	Sphere sphereRear(centerBoxRear, rBoxRear, albedo);
+	std::cout << centerBoxRear << rBoxRear << std::endl;
+	spheres.push_back(sphereRear);
+
+
+	int rBoxLeft = 100000;
+	int xBoxLeft = -99980;
+	int yBoxLeft = 256;
+	int zBoxLeft = 1500;
+	Vec3<float> centerBoxLeft = { xBoxLeft, yBoxLeft, zBoxLeft };
+	Sphere sphereLeft(centerBoxLeft, rBoxLeft, albedo - Vec3<float>{1.0f, 0.0f, 0.0f});
+	std::cout << centerBoxLeft << rBoxLeft << std::endl;
+	spheres.push_back(sphereLeft);
+
+	int rBoxRight = 100000;
+	int xBoxRight = 100492;
+	int yBoxRight = 256;
+	int zBoxRight = 1500;
+	Vec3<float> centerBoxRight = { xBoxRight, yBoxRight, zBoxRight };
+	Sphere sphereRight(centerBoxRight, rBoxRight, albedo - Vec3<float>{0.0f, 1.0f, 0.0f});
+	std::cout << centerBoxRight << rBoxRight << std::endl;
+	spheres.push_back(sphereRight);
+
+	int rBoxBottom = 100000;
+	int xBoxBottom = 256;
+	int yBoxBottom = 100492;
+	int zBoxBottom = 1500;
+	Vec3<float> centerBoxBottom = { xBoxBottom, yBoxBottom, zBoxBottom };
+	Sphere sphereBottom(centerBoxBottom, rBoxBottom, albedo - Vec3<float>{0.0f, 0.0f, 1.0f});
+	std::cout << centerBoxBottom << rBoxBottom << std::endl;
+	spheres.push_back(sphereBottom);
+
+	int rBoxTop = 100000;
+	int xBoxTop = 256;
+	int yBoxTop = -99980;
+	int zBoxTop = 1500;
+	Vec3<float> centerBoxTop = { xBoxTop, yBoxTop, zBoxTop };
+	Sphere sphereTop(centerBoxTop, rBoxTop, albedo - Vec3<float>{0.0f, 0.0f, 1.0f});
+	std::cout << centerBoxTop << rBoxTop << std::endl;
+	spheres.push_back(sphereTop);
+
+	for (int i = 0; i < nbLights; i++)
+	{
+		float x = 251 + std::rand() % 10; //->std::uniform_real_distribution
+		float y = 477 + std::rand() % 10;
+		float z = 251 + std::rand() % 10;
+		Vec3<float> lightPos = { x,y,z };
+		lights.push_back(Light(lightPos, lightColor, intensity));
+	}
+
+	//for (int i = 0; i < nbLights; i++)
+	//{
+	//	float x = 477 + std::rand() % 10;
+	//	float y = 477 + std::rand() % 10;
+	//	float z = 251 + std::rand() % 10;
+	//	Vec3<float> lightPos = { x,y,z };
+	//	lights.push_back(Light(lightPos, lightColor, intensity));
+	//}
+
+	nbSpheres += 4;
+
+	for (int i = 0; i < nbSpheres-5; i++)
 	{
 		int r = 16 + std::rand() % 48;
 		float x = 64 + std::rand() % 384;
-		float y = 256 + std::rand() % 256;
+		float y = 64 + std::rand() % 256;
 		float z = 64 + std::rand() % 384;
 		Vec3<float> c = { x, y, z };
 		Vec3<float> a = albedo - Vec3<float>{(std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f};
@@ -194,7 +245,7 @@ int main()
 					Vec3<float> normale = { ptInter.x - spheres[intersectedSphere].center.x, ptInter.y - spheres[intersectedSphere].center.y, ptInter.z - spheres[intersectedSphere].center.z };
 					normalize(normale);
 					Vec3<float> dirLight = lights[i].pos - ptInter;
-					ptInter = ptInter + dirLight * (float)0.0001;
+					ptInter = ptInter + dirLight * (float)0.001;
 					float lightDistance = norm(dirLight);
 					normalize(dirLight);
 
@@ -202,7 +253,7 @@ int main()
 					for (int l = 0; l < nbSpheres; l++)
 					{
 						std::optional<float> resLight = intersect(rayToLight, spheres[l]);
-						if (resLight.has_value())
+						if (resLight.has_value() && resLight.value()<lightDistance)
 						{
 							gotIntersected = true;
 						}
