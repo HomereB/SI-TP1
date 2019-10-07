@@ -127,18 +127,18 @@ int main()
 
 
 	int rBoxLeft = 100000;
-	int xBoxLeft = -99980;
+	int xBoxLeft = -99500;
 	int yBoxLeft = 256;
-	int zBoxLeft = 1500;
+	int zBoxLeft = 10000;
 	Vec3<float> centerBoxLeft = { xBoxLeft, yBoxLeft, zBoxLeft };
 	Sphere sphereLeft(centerBoxLeft, rBoxLeft, albedo - Vec3<float>{1.0f, 0.0f, 0.0f});
 	std::cout << centerBoxLeft << rBoxLeft << std::endl;
 	spheres.push_back(sphereLeft);
 
 	int rBoxRight = 100000;
-	int xBoxRight = 100492;
+	int xBoxRight = 100012;
 	int yBoxRight = 256;
-	int zBoxRight = 1500;
+	int zBoxRight = 10000;
 	Vec3<float> centerBoxRight = { xBoxRight, yBoxRight, zBoxRight };
 	Sphere sphereRight(centerBoxRight, rBoxRight, albedo - Vec3<float>{0.0f, 1.0f, 0.0f});
 	std::cout << centerBoxRight << rBoxRight << std::endl;
@@ -146,8 +146,8 @@ int main()
 
 	int rBoxBottom = 100000;
 	int xBoxBottom = 256;
-	int yBoxBottom = 100492;
-	int zBoxBottom = 1500;
+	int yBoxBottom = 100012;
+	int zBoxBottom = 10000;
 	Vec3<float> centerBoxBottom = { xBoxBottom, yBoxBottom, zBoxBottom };
 	Sphere sphereBottom(centerBoxBottom, rBoxBottom, albedo - Vec3<float>{0.0f, 0.0f, 1.0f});
 	std::cout << centerBoxBottom << rBoxBottom << std::endl;
@@ -155,8 +155,8 @@ int main()
 
 	int rBoxTop = 100000;
 	int xBoxTop = 256;
-	int yBoxTop = -99980;
-	int zBoxTop = 1500;
+	int yBoxTop = -99500;
+	int zBoxTop = 10000;
 	Vec3<float> centerBoxTop = { xBoxTop, yBoxTop, zBoxTop };
 	Sphere sphereTop(centerBoxTop, rBoxTop, albedo - Vec3<float>{0.0f, 0.0f, 1.0f});
 	std::cout << centerBoxTop << rBoxTop << std::endl;
