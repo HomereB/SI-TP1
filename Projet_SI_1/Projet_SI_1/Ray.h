@@ -12,6 +12,4 @@ public:
 		pos = position;
 		dir = direction;
 	}
-
-
 };
