@@ -14,19 +14,31 @@
 #include "Light.h"
 #include <algorithm>
 #include <math.h>
+#include "Box.h"
+#include <random>
 
 const int width = 512;
 const int height = 512;
-int profondeurMax = 5;
+
+std::random_device rd;
+std::mt19937 gen(rd());
+
+int profondeurMax = 3;
+
 int nbSpheres = 5;
 std::vector<Sphere> spheres;
+
 std::vector<Light> lights;
 int nbLightSource = 1;
 int nbLightsPerSource = 100;
 int lightIntensity = 2000000;
-
 Vec3<float> lightColor = { 1,1,1 };
-int nbRayonsRandom = 10;
+
+int nbRayonsRandom = 5;
+int randomRayOffset = 1;
+
+
+
 
 std::optional<float> Intersect(Ray ray,Sphere s)
 {
@@ -39,7 +51,6 @@ std::optional<float> Intersect(Ray ray,Sphere s)
 	{
 		return -b / (2 * a);
 	}
-
 
 	else if (delta > 0)
 	{
@@ -56,12 +67,40 @@ std::optional<float> Intersect(Ray ray,Sphere s)
 			return r1;
 	}
 
-
 	else if (delta < 0)
 	{
 		return std::nullopt;
 	}
 }
+
+//std::optional<double> IntersectBox(Nodes b, Ray r) {
+//	Vec3<double> dir = 1.0 / r.direction;
+//
+//	// lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
+//	// r.org is origin of ray
+//	double t1 = (b.maxPos.x - r.position.x) * dir.x;
+//	double t2 = (b.maxPos.x - r.position.x) * dir.x;
+//	double t3 = (b.minPos.y - r.position.y) * dir.y;
+//	double t4 = (b.maxPos.y - r.position.y) * dir.y;
+//	double t5 = (b.minPos.z - r.position.z) * dir.z;
+//	double t6 = (b.maxPos.z - r.position.z) * dir.z;
+//
+//	float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+//	float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+//
+//	// if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
+//	if (tmax < 0)
+//	{
+//		return nullopt;
+//	}
+//
+//	// if tmin > tmax, ray doesn't intersect AABB
+//	if (tmin > tmax)
+//	{
+//		return nullopt;
+//	}
+//	return tmin;
+//}
 
 Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 {
@@ -95,7 +134,7 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 				Vec3<float> newNormale = newPtInter - spheres[indexIntersectedSphere].center;
 				normalize(newNormale);
 				Intersection newIntersect = Intersection(newPtInter, newNormale, indexIntersectedSphere, sphereDistance);
-				color = DrawRay(profondeur + 1, newRay, newIntersect);
+				color = color + DrawRay(profondeur + 1, newRay, newIntersect);
 			}
 
 			else
@@ -106,23 +145,42 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 
 		else //gestion spheres avec lumières
 		{
-			//std::vector<Vec3<float>> indirectColors;
-			//indirectColors.resize(nbRayonsRandom);
+			Vec3<float> indirectColors = { 0,0,0 };
 
-			//for (int i = 0; i < nbRayonsRandom; i++) //eclairage indirect
-			//{
-			//	Vec3<float> dirILight = intersect.normale * dot(ray.dir * -1.0f, intersect.normale) * 2.0f + ray.dir * -1.0f;
-			//	normalize(dirILight);
-			//	Ray newRay(intersect.ptIntersection, dirILight);
-			//}
+			for (int i = 0; i < nbRayonsRandom; i++) //eclairage indirect
+			{
+				std::uniform_real_distribution<> disRayOffset(-randomRayOffset, randomRayOffset);
+				Vec3<float> dirILight = { intersect.normale.x - disRayOffset(gen) , intersect.normale.y - disRayOffset(gen), intersect.normale.z - disRayOffset(gen) }; // rayon random autour de la normale
+				normalize(dirILight);
+				Ray newRay(intersect.ptIntersection, dirILight);
 
-			//for (int i = 0; i < nbRayonsRandom; i++)
-			//{
-			//	color = color + indirectColors[i];
-			//}
 
-			std::vector<Vec3<float>> directColors;//eclairage direct
-			directColors.resize(nbLightsPerSource * nbLightSource);
+				int indexIntersectedSphere = -1;
+				float sphereDistance = 9999999;
+				bool gotIntersected = false;
+
+				for (int l = 0; l < nbSpheres; l++)
+				{
+					std::optional<float> resReflect = Intersect(newRay, spheres[l]);
+					if (resReflect.has_value() && resReflect.value() < sphereDistance)
+					{
+						indexIntersectedSphere = l;
+						sphereDistance = resReflect.value();
+						gotIntersected = true;
+					}
+				}
+
+				if (gotIntersected)
+				{
+					Vec3<float> newPtInter = intersect.ptIntersection + dirILight * sphereDistance * 0.95f;
+					Vec3<float> newNormale = newPtInter - spheres[indexIntersectedSphere].center;
+					normalize(newNormale);
+					Intersection newIntersect = Intersection(newPtInter, newNormale, indexIntersectedSphere, sphereDistance);
+					indirectColors =indirectColors + DrawRay(profondeur + 1, newRay, newIntersect)*0.01f;
+				}
+			}
+
+			Vec3<float> directColors = { 0,0,0 };//eclairage direct
 
 			for (int i = 0; i < nbLightsPerSource * nbLightSource; i++)
 			{
@@ -147,16 +205,13 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 							scal = 0;
 						}
 
-						color.x += spheres[intersect.indexIntersectedItem].color.x * lights[i].intensity * scal * lights[i].color.x / (nbLightsPerSource * lightDistance * lightDistance);
-						color.y += spheres[intersect.indexIntersectedItem].color.y * lights[i].intensity * scal * lights[i].color.y / (nbLightsPerSource * lightDistance * lightDistance);
-						color.z += spheres[intersect.indexIntersectedItem].color.z * lights[i].intensity * scal * lights[i].color.z / (nbLightsPerSource * lightDistance * lightDistance);
+						directColors.x += spheres[intersect.indexIntersectedItem].color.x * lights[i].intensity * scal * lights[i].color.x / (nbLightsPerSource * lightDistance * lightDistance);
+						directColors.y += spheres[intersect.indexIntersectedItem].color.y * lights[i].intensity * scal * lights[i].color.y / (nbLightsPerSource * lightDistance * lightDistance);
+						directColors.z += spheres[intersect.indexIntersectedItem].color.z * lights[i].intensity * scal * lights[i].color.z / (nbLightsPerSource * lightDistance * lightDistance);
 					}
 				}
 			}
-			for (int i = 0; i < nbLightsPerSource * nbLightSource; i++)
-			{
-				color = color + directColors[i];
-			}
+				color = color + directColors;
 		}
 		return color;
 	}
@@ -165,9 +220,8 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 
 int main()
 {
-
-	std::srand((int)std::time(nullptr));
 	Vec3<float> colorSphere = { 1,1,1 };
+	Vec3<float> pointCamera = {256,256,-300};
 
 	//box
 	float rBoxRear = 100000;
@@ -216,25 +270,33 @@ int main()
 	std::cout << centerBoxTop << rBoxTop << std::endl;
 	spheres.push_back(sphereTop);
 
+	std::uniform_real_distribution<> disOffsetLight(251, 261);
+	std::uniform_real_distribution<> disOffsetLightHeight(467, 477);
+
 	for (int i = 0; i < nbLightsPerSource; i++)
 	{
-		float x = 251 + std::rand() % 10; //->std::uniform_real_distribution
-		float y = 477 + std::rand() % 10;
-		float z = 251 + std::rand() % 10;
+		float x = disOffsetLight(gen);
+		float y = disOffsetLightHeight(gen);
+		float z = disOffsetLight(gen);
 		Vec3<float> lightPos = { x,y,z };
 		lights.push_back(Light(lightPos, lightColor, lightIntensity));
 	}
 
 	nbSpheres += 4;
 
+	std::uniform_real_distribution<> disPosSphere(64, 448);
+	std::uniform_real_distribution<> disHeightSphere(64, 320);
+	std::uniform_real_distribution<> disRayonSphere(16, 64);
+	std::uniform_real_distribution<> disColorSphere(0, 1);
+
 	for (int i = 0; i < nbSpheres-5; i++)
 	{
-		float r = 16 + std::rand() % 48;
-		float x = 64 + std::rand() % 384;
-		float y = 64 + std::rand() % 256;
-		float z = 64 + std::rand() % 384;
+		float r = disRayonSphere(gen);
+		float x = disPosSphere(gen);
+		float y = disHeightSphere(gen);
+		float z = disPosSphere(gen);
 		Vec3<float> c = { x, y, z };
-		Vec3<float> col = colorSphere - Vec3<float>{(std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f, (std::rand() % 100) / 100.f};
+		Vec3<float> col = colorSphere - Vec3<float>{(float)disColorSphere(gen), (float)disColorSphere(gen), (float)disColorSphere(gen)};
 		float a = 0;
 		Sphere s(c, r,col,a);
 		spheres.push_back(s);
@@ -244,7 +306,7 @@ int main()
 	{
 		float r = 64;
 		float x = 256;
-		float y = 256;
+		float y = 512-128;
 		float z = 512;
 		Vec3<float> c = { x, y, z };
 		Vec3<float> col = {0,0,0};
@@ -269,9 +331,9 @@ int main()
 			color.y = 0;
 			color.z = 0;
 
-			Vec3<float> rDir = { 0.0,0.0,1.0 };
+			Vec3<float> rDir = { 0.0,0.0,1.0};
 			normalize(rDir);
-			Vec3<float> rPos = { i,j,0.0 };
+			Vec3<float> rPos = { i, j, pointCamera.z };
 			Ray firstRay = Ray(rPos, rDir);
 
 
