@@ -4,6 +4,7 @@
 //{
 //public:
 //	Sphere sphere;
+//	int indexParent;
 //
 //	Leaf(Sphere s)
 //	{
