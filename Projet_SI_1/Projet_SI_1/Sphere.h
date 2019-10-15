@@ -1,6 +1,6 @@
 #pragma once
 #include "Vector.h"
-#include "Ray.h""
+#include "Ray.h"
 
 class Sphere
 {
