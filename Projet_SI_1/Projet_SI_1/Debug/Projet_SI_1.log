@@ -1,1 +1,33 @@
-﻿
+﻿  Intersection.cpp
+  Projet_SI_1.cpp
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(215,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(216,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(217,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(226,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(227,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(228,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(229,11): warning C4244:  'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(257,10): warning C4068:  unknown pragma
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4838:  conversion from 'int' to 'T' requires a narrowing conversion
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4838:         with
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4838:         [
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4838:             T=float
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4838:         ]
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4244:  'initializing': conversion from 'int' to 'T', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4244:         with
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4244:         [
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4244:             T=float
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,25): warning C4244:         ]
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4838:  conversion from 'int' to 'T' requires a narrowing conversion
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4838:         with
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4838:         [
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4838:             T=float
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4838:         ]
+  Generating Code...
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4244:  'initializing': conversion from 'int' to 'T', possible loss of data
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4244:         with
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4244:         [
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4244:             T=float
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(267,27): warning C4244:         ]
+D:\Projets\Synthese_Image\Projet_SI_1\Projet_SI_1\Projet_SI_1.cpp(65): warning C4715:  'Intersect': not all control paths return a value
+  Projet_SI_1.vcxproj -> D:\Projets\Synthese_Image\Projet_SI_1\Debug\Projet_SI_1.exe

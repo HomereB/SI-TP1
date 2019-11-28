@@ -23,19 +23,19 @@ const int height = 512;
 std::random_device rd;
 std::mt19937 gen(rd());
 
-int profondeurMax = 3;
+int profondeurMax = 2;
 
-int nbSpheres = 5;
+int nbSpheres = 25;
 std::vector<Sphere> spheres;
 
 std::vector<Light> lights;
 int nbLightSource = 1;
 int nbLightsPerSource = 100;
-int lightIntensity = 2000000;
+int lightIntensity = 300000;
 Vec3<float> lightColor = { 1,1,1 };
 
-int nbRayonsRandom = 5;
-int randomRayOffset = 1;
+int nbRayonsRandom = 25;
+int randomRayOffset = 15;
 
 
 
@@ -73,40 +73,13 @@ std::optional<float> Intersect(Ray ray,Sphere s)
 	}
 }
 
-//std::optional<double> IntersectBox(Nodes b, Ray r) {
-//	Vec3<double> dir = 1.0 / r.direction;
-//
-//	// lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
-//	// r.org is origin of ray
-//	double t1 = (b.maxPos.x - r.position.x) * dir.x;
-//	double t2 = (b.maxPos.x - r.position.x) * dir.x;
-//	double t3 = (b.minPos.y - r.position.y) * dir.y;
-//	double t4 = (b.maxPos.y - r.position.y) * dir.y;
-//	double t5 = (b.minPos.z - r.position.z) * dir.z;
-//	double t6 = (b.maxPos.z - r.position.z) * dir.z;
-//
-//	float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-//	float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
-//
-//	// if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-//	if (tmax < 0)
-//	{
-//		return nullopt;
-//	}
-//
-//	// if tmin > tmax, ray doesn't intersect AABB
-//	if (tmin > tmax)
-//	{
-//		return nullopt;
-//	}
-//	return tmin;
-//}
-
-Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
+Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect,int* nbRayonsLance)
 {
+	(*nbRayonsLance)++;
 	Vec3<float> color = { 0,0,0 };
 	if (profondeur < profondeurMax)
 	{
+		
 		if (spheres[intersect.indexIntersectedItem].albedo == 1) //gestion mirroirs
 		{
 			Vec3<float> dirReflect = intersect.normale * dot(ray.dir * -1.0f, intersect.normale) * 2.0f + ray.dir * -1.0f;
@@ -134,7 +107,7 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 				Vec3<float> newNormale = newPtInter - spheres[indexIntersectedSphere].center;
 				normalize(newNormale);
 				Intersection newIntersect = Intersection(newPtInter, newNormale, indexIntersectedSphere, sphereDistance);
-				color = color + DrawRay(profondeur + 1, newRay, newIntersect);
+				color = color + DrawRay(profondeur + 1, newRay, newIntersect, nbRayonsLance);
 			}
 
 			else
@@ -176,7 +149,7 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 					Vec3<float> newNormale = newPtInter - spheres[indexIntersectedSphere].center;
 					normalize(newNormale);
 					Intersection newIntersect = Intersection(newPtInter, newNormale, indexIntersectedSphere, sphereDistance);
-					indirectColors =indirectColors + DrawRay(profondeur + 1, newRay, newIntersect)*0.01f;
+					indirectColors =indirectColors + DrawRay(profondeur + 1, newRay, newIntersect, nbRayonsLance)*0.1f/(float)nbRayonsRandom;
 				}
 			}
 
@@ -221,54 +194,54 @@ Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect)
 int main()
 {
 	Vec3<float> colorSphere = { 1,1,1 };
-	Vec3<float> pointCamera = {256,256,-300};
+	Vec3<float> pointCamera = {256,256,-1200};
 
-	//box
-	float rBoxRear = 100000;
-	float xBoxRear = 256;
-	float yBoxRear = 256;
-	float zBoxRear = 101000;
-	Vec3<float> centerBoxRear = { xBoxRear, yBoxRear, zBoxRear };
-	Sphere sphereRear(centerBoxRear, rBoxRear, colorSphere,0);
-	std::cout << centerBoxRear << rBoxRear << std::endl;
-	spheres.push_back(sphereRear);
+	////box
+	//float rBoxRear = 100000;
+	//float xBoxRear = 256;
+	//float yBoxRear = 256;
+	//float zBoxRear = 101000;
+	//Vec3<float> centerBoxRear = { xBoxRear, yBoxRear, zBoxRear };
+	//Sphere sphereRear(centerBoxRear, rBoxRear, colorSphere,0);
+	//std::cout << centerBoxRear << rBoxRear << std::endl;
+	//spheres.push_back(sphereRear);
 
 
-	float rBoxLeft = 100000;
-	float xBoxLeft = -99500;
-	float yBoxLeft = 256;
-	float zBoxLeft = 10000;
-	Vec3<float> centerBoxLeft = { xBoxLeft, yBoxLeft, zBoxLeft };
-	Sphere sphereLeft(centerBoxLeft, rBoxLeft, colorSphere - Vec3<float>{1.0f, 0.0f, 0.0f},0);
-	std::cout << centerBoxLeft << rBoxLeft << std::endl;
-	spheres.push_back(sphereLeft);
+	//float rBoxLeft = 100000;
+	//float xBoxLeft = -99500;
+	//float yBoxLeft = 256;
+	//float zBoxLeft = 10000;
+	//Vec3<float> centerBoxLeft = { xBoxLeft, yBoxLeft, zBoxLeft };
+	//Sphere sphereLeft(centerBoxLeft, rBoxLeft, colorSphere - Vec3<float>{1.0f, 0.0f, 0.0f},0);
+	//std::cout << centerBoxLeft << rBoxLeft << std::endl;
+	//spheres.push_back(sphereLeft);
 
-	float rBoxRight = 100000;
-	float xBoxRight = 100012;
-	float yBoxRight = 256;
-	float zBoxRight = 10000;
-	Vec3<float> centerBoxRight = { xBoxRight, yBoxRight, zBoxRight };
-	Sphere sphereRight(centerBoxRight, rBoxRight, colorSphere - Vec3<float>{0.0f, 1.0f, 0.0f},0);
-	std::cout << centerBoxRight << rBoxRight << std::endl;
-	spheres.push_back(sphereRight);
+	//float rBoxRight = 100000;
+	//float xBoxRight = 100012;
+	//float yBoxRight = 256;
+	//float zBoxRight = 10000;
+	//Vec3<float> centerBoxRight = { xBoxRight, yBoxRight, zBoxRight };
+	//Sphere sphereRight(centerBoxRight, rBoxRight, colorSphere - Vec3<float>{0.0f, 1.0f, 0.0f},0);
+	//std::cout << centerBoxRight << rBoxRight << std::endl;
+	//spheres.push_back(sphereRight);
 
-	float rBoxBottom = 100000;
-	float xBoxBottom = 256;
-	float yBoxBottom = 100012;
-	float zBoxBottom = 10000;
-	Vec3<float> centerBoxBottom = { xBoxBottom, yBoxBottom, zBoxBottom };
-	Sphere sphereBottom(centerBoxBottom, rBoxBottom, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
-	std::cout << centerBoxBottom << rBoxBottom << std::endl;
-	spheres.push_back(sphereBottom);
+	//float rBoxBottom = 100000;
+	//float xBoxBottom = 256;
+	//float yBoxBottom = 100012;
+	//float zBoxBottom = 10000;
+	//Vec3<float> centerBoxBottom = { xBoxBottom, yBoxBottom, zBoxBottom };
+	//Sphere sphereBottom(centerBoxBottom, rBoxBottom, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
+	//std::cout << centerBoxBottom << rBoxBottom << std::endl;
+	//spheres.push_back(sphereBottom);
 
-	float rBoxTop = 100000;
-	float xBoxTop = 256;
-	float yBoxTop = -99500;
-	float zBoxTop = 10000;
-	Vec3<float> centerBoxTop = { xBoxTop, yBoxTop, zBoxTop };
-	Sphere sphereTop(centerBoxTop, rBoxTop, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
-	std::cout << centerBoxTop << rBoxTop << std::endl;
-	spheres.push_back(sphereTop);
+	//float rBoxTop = 100000;
+	//float xBoxTop = 256;
+	//float yBoxTop = -99500;
+	//float zBoxTop = 10000;
+	//Vec3<float> centerBoxTop = { xBoxTop, yBoxTop, zBoxTop };
+	//Sphere sphereTop(centerBoxTop, rBoxTop, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
+	//std::cout << centerBoxTop << rBoxTop << std::endl;
+	//spheres.push_back(sphereTop);
 
 	std::uniform_real_distribution<> disOffsetLight(251, 261);
 	std::uniform_real_distribution<> disOffsetLightHeight(467, 477);
@@ -282,14 +255,14 @@ int main()
 		lights.push_back(Light(lightPos, lightColor, lightIntensity));
 	}
 
-	nbSpheres += 4;
+	//nbSpheres += 4;
 
 	std::uniform_real_distribution<> disPosSphere(64, 448);
 	std::uniform_real_distribution<> disHeightSphere(64, 320);
 	std::uniform_real_distribution<> disRayonSphere(16, 64);
 	std::uniform_real_distribution<> disColorSphere(0, 1);
 
-	for (int i = 0; i < nbSpheres-5; i++)
+	for (int i = 0; i < nbSpheres; i++)
 	{
 		float r = disRayonSphere(gen);
 		float x = disPosSphere(gen);
@@ -323,17 +296,20 @@ int main()
 	Vec3<float> color;
 	colorPixel.rgbReserved = 255;
 
-	#pragma omp parallel for
+	int nbRayonsLanceTotal = 0;
 	for (int j = 0; j < height; j++) {
+		
+		#pragma omp parallel
 		for (int i = 0; i < width; i++) {
-
+			int nbRayonsLanceInter = 0;
 			color.x = 0;
 			color.y = 0;
 			color.z = 0;
 
-			Vec3<float> rDir = { 0.0,0.0,1.0};
+			Vec3<float> rDir = { i,j,0.0f };
+			rDir =rDir - pointCamera;
 			normalize(rDir);
-			Vec3<float> rPos = { i, j, pointCamera.z };
+			Vec3<float> rPos = { i, j, 0 };
 			Ray firstRay = Ray(rPos, rDir);
 
 
@@ -357,18 +333,18 @@ int main()
 				Vec3<float> firstNormale = firstPtInter - spheres[indexIntersectedSphere].center;
 				normalize(firstNormale);
 				Intersection firstIntersect = Intersection(firstPtInter, firstNormale, indexIntersectedSphere, sphereDistance);
-				color = DrawRay(0, firstRay, firstIntersect);
+				color = DrawRay(0, firstRay, firstIntersect,&nbRayonsLanceInter);
 			}
 			colorPixel.rgbRed = std::clamp((int)color.x, 0, 255);
 			colorPixel.rgbGreen = std::clamp((int)color.y, 0, 255);
 			colorPixel.rgbBlue = std::clamp((int)color.z, 0, 255);
 
 			FreeImage_SetPixelColor(bitmap, i, j, &colorPixel);
+			nbRayonsLanceTotal += nbRayonsLanceInter;
 		}
 	}
-
+	std::cout << "nombre de rayons lances : "<<nbRayonsLanceTotal<<std::endl;
 	FreeImage_Save(FIF_PNG, bitmap, "c_bo.png");
-
 	FreeImage_DeInitialise();
 }
 
