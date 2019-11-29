@@ -16,6 +16,7 @@
 #include <math.h>
 #include "Box.h"
 #include <random>
+#include<chrono>
 
 const int width = 512;
 const int height = 512;
@@ -23,19 +24,19 @@ const int height = 512;
 std::random_device rd;
 std::mt19937 gen(rd());
 
-int profondeurMax = 2;
+int profondeurMax = 3;
 
-int nbSpheres = 25;
+int nbSpheres = 2000;
 std::vector<Sphere> spheres;
 
 std::vector<Light> lights;
-int nbLightSource = 1;
-int nbLightsPerSource = 100;
-int lightIntensity = 300000;
+int nbLightSource = 3;
+int nbLightsPerSource = 15;
+int lightIntensity = 500000;
 Vec3<float> lightColor = { 1,1,1 };
 
-int nbRayonsRandom = 25;
-int randomRayOffset = 15;
+int nbRayonsRandom = 5;
+int randomRayOffset = 30;
 
 
 
@@ -73,7 +74,7 @@ std::optional<float> Intersect(Ray ray,Sphere s)
 	}
 }
 
-Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect,int* nbRayonsLance)
+Vec3<float> DrawRay(int profondeur, Ray ray, Intersection intersect,long* nbRayonsLance)
 {
 	(*nbRayonsLance)++;
 	Vec3<float> color = { 0,0,0 };
@@ -243,23 +244,45 @@ int main()
 	//std::cout << centerBoxTop << rBoxTop << std::endl;
 	//spheres.push_back(sphereTop);
 
-	std::uniform_real_distribution<> disOffsetLight(251, 261);
-	std::uniform_real_distribution<> disOffsetLightHeight(467, 477);
+	std::uniform_real_distribution<> disOffsetLight1(251, 261);
+	std::uniform_real_distribution<> disOffsetLightHeight1(567, 577);
 
 	for (int i = 0; i < nbLightsPerSource; i++)
 	{
-		float x = disOffsetLight(gen);
-		float y = disOffsetLightHeight(gen);
-		float z = disOffsetLight(gen);
+		float x = disOffsetLight1(gen);
+		float y = disOffsetLightHeight1(gen);
+		float z = disOffsetLight1(gen);
 		Vec3<float> lightPos = { x,y,z };
 		lights.push_back(Light(lightPos, lightColor, lightIntensity));
 	}
 
+	std::uniform_real_distribution<> disOffsetLight2(251, 261);
+	std::uniform_real_distribution<> disOffsetLightHeight2(-200, -190);
+
+	for (int i = 0; i < nbLightsPerSource; i++)
+	{
+		float x = disOffsetLight2(gen);
+		float y = disOffsetLightHeight2(gen);
+		float z = disOffsetLight2(gen);
+		Vec3<float> lightPos = { x,y,z };
+		lights.push_back(Light(lightPos, lightColor, lightIntensity));
+	}
+	std::uniform_real_distribution<> disOffsetLight3(-200, -190);
+	std::uniform_real_distribution<> disOffsetLightHeight3(467, 477);
+
+	for (int i = 0; i < nbLightsPerSource; i++)
+	{
+		float x = disOffsetLight3(gen);
+		float y = disOffsetLightHeight3(gen);
+		float z = disOffsetLight3(gen);
+		Vec3<float> lightPos = { x,y,z };
+		lights.push_back(Light(lightPos, lightColor, lightIntensity));
+	}
 	//nbSpheres += 4;
 
-	std::uniform_real_distribution<> disPosSphere(64, 448);
-	std::uniform_real_distribution<> disHeightSphere(64, 320);
-	std::uniform_real_distribution<> disRayonSphere(16, 64);
+	std::uniform_real_distribution<> disPosSphere(10, 500);
+	std::uniform_real_distribution<> disHeightSphere(10, 380);
+	std::uniform_real_distribution<> disRayonSphere(8, 16);
 	std::uniform_real_distribution<> disColorSphere(0, 1);
 
 	for (int i = 0; i < nbSpheres; i++)
@@ -277,16 +300,16 @@ int main()
 	}
 	nbSpheres++; //sphere mirroir
 	{
-		float r = 64;
+		float r = 128;
 		float x = 256;
 		float y = 512-128;
-		float z = 512;
+		float z = 1024;
 		Vec3<float> c = { x, y, z };
 		Vec3<float> col = {0,0,0};
 		float a = 1;
 		Sphere s(c, r, col, a);
 		spheres.push_back(s);
-		std::cout << c << r << std::endl;
+		//std::cout << c << r << std::endl;
 	}
 
 	FreeImage_Initialise();
@@ -297,11 +320,17 @@ int main()
 	colorPixel.rgbReserved = 255;
 
 	int nbRayonsLanceTotal = 0;
+	long nbRayonsLances[width] = { 0 };
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+
+
+
 	for (int j = 0; j < height; j++) {
 		
-		#pragma omp parallel
+		#pragma omp parallel for
 		for (int i = 0; i < width; i++) {
-			int nbRayonsLanceInter = 0;
 			color.x = 0;
 			color.y = 0;
 			color.z = 0;
@@ -333,17 +362,25 @@ int main()
 				Vec3<float> firstNormale = firstPtInter - spheres[indexIntersectedSphere].center;
 				normalize(firstNormale);
 				Intersection firstIntersect = Intersection(firstPtInter, firstNormale, indexIntersectedSphere, sphereDistance);
-				color = DrawRay(0, firstRay, firstIntersect,&nbRayonsLanceInter);
+				color = DrawRay(0, firstRay, firstIntersect,nbRayonsLances+i);
 			}
 			colorPixel.rgbRed = std::clamp((int)color.x, 0, 255);
 			colorPixel.rgbGreen = std::clamp((int)color.y, 0, 255);
 			colorPixel.rgbBlue = std::clamp((int)color.z, 0, 255);
 
 			FreeImage_SetPixelColor(bitmap, i, j, &colorPixel);
-			nbRayonsLanceTotal += nbRayonsLanceInter;
 		}
 	}
+
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+	for (int i = 0; i < width;i++)
+	{
+		nbRayonsLanceTotal += nbRayonsLances[i];
+	}
 	std::cout << "nombre de rayons lances : "<<nbRayonsLanceTotal<<std::endl;
+	std::cout << "temps ecoule : " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+
 	FreeImage_Save(FIF_PNG, bitmap, "c_bo.png");
 	FreeImage_DeInitialise();
 }
