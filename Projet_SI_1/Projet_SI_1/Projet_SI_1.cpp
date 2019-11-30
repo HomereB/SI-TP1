@@ -1,6 +1,3 @@
-// Projet_SI_1.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
-//
-
 #include <iostream>
 #include <FreeImage.h>
 #include <conio.h>
@@ -26,7 +23,7 @@ std::mt19937 gen(rd());
 
 int profondeurMax = 3;
 
-int nbSpheres = 2000;
+int nbSpheres = 101;
 std::vector<Sphere> spheres;
 
 std::vector<Light> lights;
@@ -197,53 +194,7 @@ int main()
 	Vec3<float> colorSphere = { 1,1,1 };
 	Vec3<float> pointCamera = {256,256,-1200};
 
-	////box
-	//float rBoxRear = 100000;
-	//float xBoxRear = 256;
-	//float yBoxRear = 256;
-	//float zBoxRear = 101000;
-	//Vec3<float> centerBoxRear = { xBoxRear, yBoxRear, zBoxRear };
-	//Sphere sphereRear(centerBoxRear, rBoxRear, colorSphere,0);
-	//std::cout << centerBoxRear << rBoxRear << std::endl;
-	//spheres.push_back(sphereRear);
-
-
-	//float rBoxLeft = 100000;
-	//float xBoxLeft = -99500;
-	//float yBoxLeft = 256;
-	//float zBoxLeft = 10000;
-	//Vec3<float> centerBoxLeft = { xBoxLeft, yBoxLeft, zBoxLeft };
-	//Sphere sphereLeft(centerBoxLeft, rBoxLeft, colorSphere - Vec3<float>{1.0f, 0.0f, 0.0f},0);
-	//std::cout << centerBoxLeft << rBoxLeft << std::endl;
-	//spheres.push_back(sphereLeft);
-
-	//float rBoxRight = 100000;
-	//float xBoxRight = 100012;
-	//float yBoxRight = 256;
-	//float zBoxRight = 10000;
-	//Vec3<float> centerBoxRight = { xBoxRight, yBoxRight, zBoxRight };
-	//Sphere sphereRight(centerBoxRight, rBoxRight, colorSphere - Vec3<float>{0.0f, 1.0f, 0.0f},0);
-	//std::cout << centerBoxRight << rBoxRight << std::endl;
-	//spheres.push_back(sphereRight);
-
-	//float rBoxBottom = 100000;
-	//float xBoxBottom = 256;
-	//float yBoxBottom = 100012;
-	//float zBoxBottom = 10000;
-	//Vec3<float> centerBoxBottom = { xBoxBottom, yBoxBottom, zBoxBottom };
-	//Sphere sphereBottom(centerBoxBottom, rBoxBottom, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
-	//std::cout << centerBoxBottom << rBoxBottom << std::endl;
-	//spheres.push_back(sphereBottom);
-
-	//float rBoxTop = 100000;
-	//float xBoxTop = 256;
-	//float yBoxTop = -99500;
-	//float zBoxTop = 10000;
-	//Vec3<float> centerBoxTop = { xBoxTop, yBoxTop, zBoxTop };
-	//Sphere sphereTop(centerBoxTop, rBoxTop, colorSphere - Vec3<float>{0.0f, 0.0f, 1.0f},0);
-	//std::cout << centerBoxTop << rBoxTop << std::endl;
-	//spheres.push_back(sphereTop);
-
+	//Lumières
 	std::uniform_real_distribution<> disOffsetLight1(251, 261);
 	std::uniform_real_distribution<> disOffsetLightHeight1(567, 577);
 
@@ -267,18 +218,56 @@ int main()
 		Vec3<float> lightPos = { x,y,z };
 		lights.push_back(Light(lightPos, lightColor, lightIntensity));
 	}
-	std::uniform_real_distribution<> disOffsetLight3(-200, -190);
-	std::uniform_real_distribution<> disOffsetLightHeight3(467, 477);
+
+	std::uniform_real_distribution<> disOffsetLight3(251, 261);
+	std::uniform_real_distribution<> disOffsetLightHeight3(567, 577);
 
 	for (int i = 0; i < nbLightsPerSource; i++)
 	{
-		float x = disOffsetLight3(gen);
-		float y = disOffsetLightHeight3(gen);
+		float x = disOffsetLightHeight3(gen);
+		float y = disOffsetLight3(gen);
 		float z = disOffsetLight3(gen);
 		Vec3<float> lightPos = { x,y,z };
 		lights.push_back(Light(lightPos, lightColor, lightIntensity));
 	}
-	//nbSpheres += 4;
+
+	//std::uniform_real_distribution<> disOffsetLight4(251, 261);
+	//std::uniform_real_distribution<> disOffsetLightHeight4(-200, -190);
+
+	//for (int i = 0; i < nbLightsPerSource; i++)
+	//{
+	//	float x = disOffsetLightHeight4(gen);
+	//	float y = disOffsetLight4(gen);
+	//	float z = disOffsetLight4(gen);
+	//	Vec3<float> lightPos = { x,y,z };
+	//	lights.push_back(Light(lightPos, lightColor, lightIntensity));
+	//}
+
+	//std::uniform_real_distribution<> disOffsetLight5(251, 261);
+	//std::uniform_real_distribution<> disOffsetLightHeight5(567, 577);
+
+	//for (int i = 0; i < nbLightsPerSource; i++)
+	//{
+	//	float x = disOffsetLight5(gen);
+	//	float y = disOffsetLight5(gen);
+	//	float z = disOffsetLightHeight5(gen);
+	//	Vec3<float> lightPos = { x,y,z };
+	//	lights.push_back(Light(lightPos, lightColor, lightIntensity));
+	//}
+
+	//std::uniform_real_distribution<> disOffsetLight6(251, 261);
+	//std::uniform_real_distribution<> disOffsetLightHeight6(-200, -190);
+
+	//for (int i = 0; i < nbLightsPerSource; i++)
+	//{
+	//	float x = disOffsetLight6(gen);
+	//	float y = disOffsetLight6(gen);
+	//	float z = disOffsetLightHeight6(gen);
+	//	Vec3<float> lightPos = { x,y,z };
+	//	lights.push_back(Light(lightPos, lightColor, lightIntensity));
+	//}
+
+	//sphères 
 
 	std::uniform_real_distribution<> disPosSphere(10, 500);
 	std::uniform_real_distribution<> disHeightSphere(10, 380);
@@ -296,9 +285,11 @@ int main()
 		float a = 0;
 		Sphere s(c, r,col,a);
 		spheres.push_back(s);
-		std::cout << c << r << std::endl;
 	}
-	nbSpheres++; //sphere mirroir
+
+	//sphere mirroir
+	
+	nbSpheres++; 
 	{
 		float r = 128;
 		float x = 256;
@@ -309,8 +300,9 @@ int main()
 		float a = 1;
 		Sphere s(c, r, col, a);
 		spheres.push_back(s);
-		//std::cout << c << r << std::endl;
 	}
+
+
 
 	FreeImage_Initialise();
 
@@ -323,9 +315,6 @@ int main()
 	long nbRayonsLances[width] = { 0 };
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-
-
 
 	for (int j = 0; j < height; j++) {
 		
